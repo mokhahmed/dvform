@@ -1,0 +1,20 @@
+
+config {
+  type: "incremental",
+  schema: "citibike_sql_dvm",
+  name: "sat_sql_trips",
+  columns: models.trips.columns_descriptions,
+  description: "satellite trips table",
+  uniqueKey: ["trips_hash_id", "hash_diff"],
+  tags: ["data-vault-sql"]
+}
+
+${
+    dvform.get_sat(
+      models.trips.columns, 
+      ref("stg_sql_trips"), 
+      ref("hub_sql_trips"), 
+      "trips_hash_id"
+    )
+}
+

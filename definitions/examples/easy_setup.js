@@ -1,3 +1,5 @@
+dvform = require("dvform");
+
 load_id = dataform.projectConfig.vars.load_id
 source_schema_name = "citibike_source"
 stage_schema_name = "citibike_stage"
@@ -16,7 +18,6 @@ links_tables= [
     hub2: models.trips
   }
 ]
-
 
 dvform.create_data_vault_from_model(
     load_id,

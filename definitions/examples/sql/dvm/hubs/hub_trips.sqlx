@@ -1,0 +1,18 @@
+
+config {
+  type: "incremental",
+  schema: "citibike_sql_dvm",
+  name: "hub_sql_trips",
+  columns: models.trips.columns_descriptions,
+  description: "hub trips table",
+  uniqueKey: ["trips_hash_id"],
+  tags: ["data-vault-sql"]
+}
+
+${
+    dvform.get_hub(
+      models.trips.columns, 
+      ref("stg_sql_trips"),
+      "trips_hash_id"
+    )
+}

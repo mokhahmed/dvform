@@ -1,0 +1,20 @@
+
+config {
+  type: "incremental",
+  schema: "citibike_sql_dvm",
+  name: "sat_sql_stations",
+  columns: models.stations.columns_descriptions,
+  description: "satellite stations table",
+  uniqueKey: ["stations_hash_id", "hash_diff"],
+  tags: ["data-vault-sql"]
+}
+
+${ 
+  dvform.get_sat(
+    models.stations.columns,
+    ref("stg_sql_stations"), 
+    ref("hub_sql_stations"), 
+    "stations_hash_id"
+  )
+}
+

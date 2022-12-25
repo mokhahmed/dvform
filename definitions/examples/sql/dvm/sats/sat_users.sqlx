@@ -1,0 +1,19 @@
+config {
+  type: "incremental",
+  schema: "citibike_sql_dvm",
+  name: "sat_sql_users",
+  columns: models.users.columns_descriptions,
+  description: "satellite users table",
+  uniqueKey: ["users_hash_id", "hash_diff"],
+  tags: ["data-vault-sql"]
+}
+
+${
+    dvform.get_sat( 
+      models.users.columns, 
+      ref("stg_sql_users"), 
+      ref("hub_sql_users"), 
+      "users_hash_id"
+    )
+}
+

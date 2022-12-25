@@ -1,0 +1,21 @@
+config {
+  type: "incremental",
+  schema: "citibike_stage_sql",
+  name: "stg_sql_trips",
+  description: "Cleaned up data for trips data source",
+  columns: models.trips.columns_descriptions,
+  tags: ["stage-sql"],
+   bigquery: {
+    partitionBy: "DATE(load_time)",
+    clusterBy: ["load_id"]
+  }
+}
+
+
+${
+  dvform.get_stage_table(
+    dataform.projectConfig.vars.load_id, 
+    ref("src_sql_trips"), 
+    models.trips.columns
+  )
+}

@@ -1,0 +1,6 @@
+config {
+  type: "declaration",
+  schema: "citibike_source_sql",
+  name: "src_sql_users",
+  description: "External table for users data source"
+}
