@@ -36,18 +36,15 @@ Citibike entities are ingested into Stage Layer where we are keeping the data wi
 
 ### The Data Vault Model consists of 3 concepts:<br/>
 
-  * **Hub Tables**: collects all the business keys present in a source entity. <br/>
-  For each Hub table we add 3 columns:
+  * **Hub Tables**: collects all the business keys present in a source entity for each Hub table we add 3 columns.
   
     | **Column**    | **Description**                                                                                                                                           | 
     |-----------|:------------------------------------------------------------------------------------------------------------------------------------------------------|
     | **Hash_Id**   | A new String column to uniquely identify a record in the hub table, and it’s calculated based on the business keys. e.g   user_hash_id : md5(user_id) |
     | **Source**    | A new String column to capture the source data location / table.                                                                                      |           
-    | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                                                | 
-    <br/>
+    | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                                                |
 
-  * **Link Tables**: represents, as N-to-N relationship, a relationship and uses the business keys to connect 2 Hubs.<br/>
-     For each Link table we add 3 columns
+  * **Link Tables**: represents as N-to-N relationship and uses the business keys to connect 2 Hubs for each Link table we add 3 columns.
   
     | **Column**        | **Description**                                                                                                                   |                                                                                                                             
     |:--------------|:------------------------------------------------------------------------------------------------------------------------------|
@@ -55,15 +52,14 @@ Citibike entities are ingested into Stage Layer where we are keeping the data wi
     | **Source**    | A new String column to capture the source data location / table.                                                              |
     | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                        |
      
-  * **Satellite Tables** :  store all data that describes a row in a Hub or a Link.<br/>
-       For each satellite table we add 4 columns
+  * **Satellite Tables** :  store all data that describes a row in a Hub or a Link for each satellite table we add 4 columns.
 
     | **Column**    | **Description**                                                                                                                            |                                                                                                                             
     |:--------------|:-------------------------------------------------------------------------------------------------------------------------------------------|
-     | **Hash_Id**   | A new String column to refer to the hub hash id. e.g   user_hash_id                                                                        |
-     | **Hash_diff** | A new String column to uniquely identify non-business key columns. e.g. users hash_diff: md5(user_type, gender, birth_year, customer_plan) |
-     | **Source**    | A new String column to capture the source data location / table.                                                                           |
-     | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                                     |
+    | **Hash_Id**   | A new String column to refer to the hub hash id. e.g   user_hash_id                                                                        |
+    | **Hash_diff** | A new String column to uniquely identify non-business key columns. e.g. users hash_diff: md5(user_type, gender, birth_year, customer_plan) |
+    | **Source**    | A new String column to capture the source data location / table.                                                                           |
+    | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                                     |
 
 So we need to change the citibike data model as below to store it at the **data vault Layer**
 
