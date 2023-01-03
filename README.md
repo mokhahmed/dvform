@@ -18,7 +18,7 @@ Data vault is a relatively new design methodology for data warehouses. Data vaul
 * Slower Data Mart Results
 
 
-### Data Vault Architecture Layers
+## Data Vault Architecture Layers
 * **Staging Layer** does not apply any changes to the data, it provides a temporary area to support the process of moving data from various sources into the Data Warehouse.
 * **Raw Vault** stores persistently the data in a model built around the identification of the business keys in the data sources.
 * **Business Vault** in which we deal with Soft Business Rules, Data Quality. There are many reasons to refactor it over time.
@@ -58,3 +58,124 @@ Citibike entities are ingested into Stage Layer where we are keeping the data wi
 So we need to change the citibike data model as below to store it at the **data vault Layer**
 
 ![alt citibike_data_vault_model](resources/citibike-datavault-model.png) 
+
+## How to use DVForm to create a data vault model ? 
+
+DVForm is a utility library based on Dataform that allow you to create easily create you data vault model in a generic, automated and configurable way.
+
+### Installation 
+
+Add the package to your package.json file in your Dataform project. You can find the most up-to-date package version on the [releases page](https://github.com/mokhahmed/dvform/releases).
+or you can download the index.js file and import it into `includes/index.js` then you can it from js or sqlx scripts for more details refer to [reuse code guide](https://cloud.google.com/dataform/docs/reuse-code-includes) 
+
+```
+{
+  "name": "demo",
+  "dependencies": {
+    "@dataform/core": "2.0.1",
+    "dvform":"https://github.com/mokhahmed/dvform/archive/0.1.tar.gz"
+    }
+}
+```
+
+### Usage
+
+#### 1. create citibike entities configuration `includes/models.js`  [citibike models example](includes/models.js) <br/>
+
+  * **Define the entity configurations in the following structure <br/>**
+
+    | Record Name          | Description                                               |
+    |:---------------------|:----------------------------------------------------------|
+    | name                 | String of the name for the entity e.g. (users, bikes, ..) |
+    | columns              | Array of columns object structure                         |
+    | columns_descriptions | Array of columns description object structure             |
+
+    **example** 
+    
+    ```
+    var entity_example = {
+      "name": "entity_name",
+      "columns": entity_columns_obj,
+      "columns_descriptions": entity_columns_descriptions_obj
+    }
+    ```
+
+    * **Define the entity columns configurations in the following structure <br/>**
+
+      | Record Name        | Description                                               |
+      |:-------------------|:----------------------------------------------------------|
+      | source_column_name | String of the name for the entity e.g. (users, bikes, ..) |
+      | source_data_type   | Array of columns object structure                         |
+      | target_column_name | Array of columns description object structure             |
+      | target_data_type   | Array of columns description object structure             |
+      | is_key             | Array of columns description object structure             |
+      | is_calculated      | Array of columns description object structure             |
+      | calculated_by      | Array of columns description object structure             |
+      | description        | Array of columns description object structure             |
+  
+      **example** 
+      ```
+        var entity_columns_obj =  [{
+            "source_column_name": "col1",
+            "source_data_type": "integer",
+            "target_column_name": "col2",
+            "target_data_type": "integer",
+            "is_key": "Y",
+            "is_calculated": "N",
+            "calculated_by": "",
+            "description": "col2 breif decription"
+          }, ... ]
+      ```
+  * **Define the entity columns configurations in the following structure**
+    
+    | Record Name   | Description                                                                    |
+    |:--------------|:-------------------------------------------------------------------------------|
+    | <COLUMN_NAME> | String for the column description the should appear in bigquery documentations |
+    
+    example 
+    ```
+      var entity_columns_descriptions_obj =  [{
+          "col2": "col2 breif decription",
+        }, ... ]
+    ```
+
+
+### you have 3 options to use DVForm based on the level of customization required
+
+using 
+
+## CICD for Dataform Pipelines
+
+![alt ci-cd](resources/cicd.png)
+
+* Push a new change to the dataform project git repository.
+* Cloud build/ triggered.
+* Create an image and push it into GCR.
+* Deploy the dag to the cloud composer bucket.
+* Composer Dag task will run  and create the dataform code.
+* All tables will be created/updated in BigQuery.
+
+
+## Scheduling
+
+### Cloud Composer as dataform scheduler:
+* Dataform can be scheduled using DAG/task in Cloud Composer
+* Dataform will run on top of Kubernetes Cluster (compared to local machine / VM)
+* The Kubernetes Cluster can be a standalone or Cloud Composer GKE cluster. If using the Cloud Composer GKE cluster, each Dataform run will run in a dedicated Kubernetes pod.
+* Cloud Composer can manage the variables and environment variables which can also be further used by Dataform pipelines.
+
+### Logging and monitoring
+We can see the dbt logs from Cloud Composer UI for each DAG run.
+As an example, this is the dbt run log that you can open from the Airflow UI:
+
+### Backfilling
+One of the best features in the Airflow is how it handles backfill. This Airflow feature can be implemented together with dataform.
+
+For example, this is an example of DAG that runs dataform:
+
+As a usual Airflow DAG, you can rerun any of the tasks or DAG run to backfill the data. Using the correct setup, the dbt will be able to handle the backfill mechanism from Airflow.
+
+## Data Quality
+
+### Dataform Assertions 
+### Dataform Tests
