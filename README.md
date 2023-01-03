@@ -34,26 +34,36 @@ Citibike entities are ingested into Stage Layer where we are keeping the data wi
 ![alt citibike_model](resources/citibike-source.png) 
 
 
-###The Data Vault Model consists of 3 concepts:<br/>
+### The Data Vault Model consists of 3 concepts:<br/>
 
-* **Hub Tables**: collects all the business keys present in a source entity. <br/>
+  * **Hub Tables**: collects all the business keys present in a source entity. <br/>
   For each Hub table we add 3 columns:
-  * **Hash_Id** : A new String column to uniquely identify a record in the hub table, and it’s calculated based on the business keys. e.g   user_hash_id : md5(user_id)
-  * **Source**: A new String column to capture the source data location / table.
-  * **Load_Time**:  A new Timestamp column to represent the ingestion time into the table.
-<br/>
-* **Link Tables**: represents, as N-to-N relationship, a relationship and uses the business keys to connect 2 Hubs.<br/>
-   For each Link table we add 3 columns
-  * **Hash_Id** : A new String column to uniquely identify a record in the link table. E.g bike_trip_hash_id : md5(bike_hash_id, trip_hash_id)
-  * **Source**: A new String column to capture the source data location / table.
-  * **Load_Time**:  A new Timestamp column to represent the ingestion time into the table.
-<br/>
-* **Satellite Tables** :  store all data that describes a row in a Hub or a Link.<br/>
-   For each satellite table we add 4 columns
-  * **Hash_Id** : A new String column to refer to the hub hash id. e.g   user_hash_id
-  * **Hash_diff** : A new String column to uniquely identify non-business key columns. e.g. users hash_diff: md5(user_type, gender, birth_year, customer_plan)
-  * **Source**: A new String column to capture the source data location / table.
-  * **Load_Time**:  A new Timestamp column to represent the ingestion time into the table.
+  
+    | **Column**    | **Description**                                                                                                                                           | 
+    |-----------|:------------------------------------------------------------------------------------------------------------------------------------------------------|
+    | **Hash_Id**   | A new String column to uniquely identify a record in the hub table, and it’s calculated based on the business keys. e.g   user_hash_id : md5(user_id) |
+    | **Source**    | A new String column to capture the source data location / table.                                                                                      |           
+    | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                                                | 
+    <br/>
+
+  * **Link Tables**: represents, as N-to-N relationship, a relationship and uses the business keys to connect 2 Hubs.<br/>
+     For each Link table we add 3 columns
+  
+    | **Column**        | **Description**                                                                                                                   |                                                                                                                             
+    |:--------------|:------------------------------------------------------------------------------------------------------------------------------|
+    | **Hash_Id**   | A new String column to uniquely identify a record in the link table. e.g. bike_trip_hash_id : md5(bike_hash_id, trip_hash_id) |
+    | **Source**    | A new String column to capture the source data location / table.                                                              |
+    | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                        |
+     
+  * **Satellite Tables** :  store all data that describes a row in a Hub or a Link.<br/>
+       For each satellite table we add 4 columns
+
+    | **Column**    | **Description**                                                                                                                            |                                                                                                                             
+    |:--------------|:-------------------------------------------------------------------------------------------------------------------------------------------|
+     | **Hash_Id**   | A new String column to refer to the hub hash id. e.g   user_hash_id                                                                        |
+     | **Hash_diff** | A new String column to uniquely identify non-business key columns. e.g. users hash_diff: md5(user_type, gender, birth_year, customer_plan) |
+     | **Source**    | A new String column to capture the source data location / table.                                                                           |
+     | **Load_Time** | A new Timestamp column to represent the ingestion time into the table.                                                                     |
 
 So we need to change the citibike data model as below to store it at the **data vault Layer**
 
@@ -102,16 +112,16 @@ or you can download the index.js file and import it into `includes/index.js` the
 
     * **Define the entity columns configurations in the following structure <br/>**
 
-      | Record Name        | Description                                               |
-      |:-------------------|:----------------------------------------------------------|
-      | source_column_name | String of the name for the entity e.g. (users, bikes, ..) |
-      | source_data_type   | Array of columns object structure                         |
-      | target_column_name | Array of columns description object structure             |
-      | target_data_type   | Array of columns description object structure             |
-      | is_key             | Array of columns description object structure             |
-      | is_calculated      | Array of columns description object structure             |
-      | calculated_by      | Array of columns description object structure             |
-      | description        | Array of columns description object structure             |
+      | Record Name        | Description                                                                                  |
+      |----------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------|
+      | source_column_name | String for the name for the column in the source table e.g. (users_id,user_type, ..)         |
+      | source_data_type   | String for the data type of the column in the source table  (stirng , int, float, timestamp) |
+      | target_column_name | String for the name for the column in the source table e.g. (users_id,user_type, ..)         |
+      | target_data_type   | String for the data type of the column in the target table  (stirng , int, float, timestamp) |
+      | is_key             | "Y/N" yes or no flag represents if this column is a unique business key                      |
+      | is_calculated      | "Y/N" yes or no flag if this column is calculated based on external logic                    |
+      | calculated_by      | String for the sql logic to be applied for this column                                       |
+      | description        | String decription for the column that should appear at BigQuery Documentation                |
   
       **example** 
       ```
@@ -142,7 +152,8 @@ or you can download the index.js file and import it into `includes/index.js` the
 
 ### you have 3 options to use DVForm based on the level of customization required
 
-using 
+Using `create_data_vault_from_model` 
+ 
 
 ## CICD for Dataform Pipelines
 
