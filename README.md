@@ -310,5 +310,76 @@ As a usual Airflow DAG, you can rerun any of the tasks or DAG run to backfill th
 
 ## Data Quality
 
-### Dataform Assertions 
+### Dataform Assertions
+Assertions enable you to check the state of data produced by other actions.
+An assertion query is written to find rows that violate one or more rules. If the query returns any rows, then the assertion will fail.
+
+```
+config {
+  type: "table",
+  assertions: {
+    uniqueKey: ["user_hash_id"],
+    nonNull: ["user_id", ""]
+  }
+}
+select ... 
+```
+
+By Default DVForm creates an assertions for tables based on the is_key flag in the entity object to ensure the data uniqueness, 
+but you can extend this behaviour and write a custom assertions. 
+
+```
+config { type: "assertion" }
+
+WITH base AS (
+SELECT
+  user_id,
+  SUM(1) as rows
+FROM ${ref("stg_citibike_users")}
+)
+SELECT * FROM base WHERE rows > 1
+
+```
+
 ### Dataform Tests
+
+Unit tests give you confidence that your code produces the output data you expect. Unit tests differ from assertions in that assertions are used to check the contents of datasets in your data warehouse, while unit tests are used to validate your SQL code. Assertions verify data, and unit tests verify logic.
+
+A SQLX unit test passes fake input to a table or view query, checking that the output rows match some expected output data.
+
+By default, DVForm is not generating any unit-tests, but you can still write your test cases, add it your dataform code and run it as part of the [ci/cd pipeline](cicd/.gitlab-ci.yml)
+
+* Example
+
+Suppose we have the following view SQLX query:
+```
+config {
+  type: "view",
+  name: "age_groups"
+}
+SELECT
+  FLOOR(age / 5) * 5 AS age_group,
+  COUNT(1) AS user_count
+FROM ${ref("ages")}
+GROUP BY age_group
+
+```
+We might want to write a unit test to check that the age_groups query works as we expect it to.
+```
+config {
+  type: "test",
+  dataset: "age_groups"
+}
+
+input "ages" {
+  SELECT 15 AS age UNION ALL
+  SELECT 21 AS age UNION ALL
+  SELECT 24 AS age UNION ALL
+  SELECT 34 AS age
+}
+
+SELECT 15 AS age_group, 1 AS user_count UNION ALL
+SELECT 20 AS age_group, 2 AS user_count UNION ALL
+SELECT 30 AS age_group, 1 AS user_count
+```
+his unit test replaces the ages input to the age_groups query, and checks that the resulting output rows match the three expected age_group rows.
