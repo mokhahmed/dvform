@@ -148,10 +148,133 @@ or you can download the index.js file and import it into `includes/index.js` the
 
 ### you have 3 options to use DVForm based on the level of customization required
 
-Using `create_data_vault_from_model` 
+* **Using `create_data_vault_from_model` api. e.g. [easy_setup example](definitions/easy_setup.js)**
  
+```
+create_data_vault_from_model(
+    load_id,
+    source_schema_name,
+    stage_schema_name,
+    data_vault_schema_name,
+    source_tables_prefix,
+    stage_tables_prefix,
+    hubs_tables_prefix,
+    satellites_tables_prefix,
+    links_tables_prefix,
+    tables_type,
+    all_models,
+    links_tables
+)
+```
 
-## CICD for Dataform Pipelines
+| Argument                 | Description                                                    |
+|:-------------------------|:---------------------------------------------------------------|
+ | load_id                  | String for a unique id to differentiate between different runs |
+| source_schema_name       | String for source tables dataset name                          |
+| stage_schema_name        | String for staging tables dataset name                         |
+| data_vault_schema_name   | String for data vault tables dataset name                      |
+| source_tables_prefix     | String for source tables prefix or empty if not applicable     |
+| stage_tables_prefix      | String for stage tables prefix or empty if not applicable      |
+| hubs_tables_prefix       | String for hub tables prefix or empty if not applicable        |
+| satellites_tables_prefix | String for satellites tables prefix or empty if not applicable |
+| links_tables_prefix      | String for links tables prefix or empty if not applicable      |
+| tables_type              | String for tables type (incremental/ table / view)             |
+| all_models               | List for all entities objects                                  |
+| links_tables             | List of link tables to be created                              |
+
+* create layer by layer [stage](definitions/examples/js/stg), [data-vault](definitions/examples/js/dvm), ... 
+
+for example create the staging layer tables
+```
+create_staging_tables(
+    load_id, 
+    schema_name, 
+    source_tables_prefix, 
+    target_tables_prefix, 
+    tables_type, 
+    staging_tables
+)
+```
+
+| Argument             | Description                                                    |
+|:---------------------|:---------------------------------------------------------------|
+| load_id              | String for a unique id to differentiate between different runs |
+| schema_name          | String for stage tables dataset name                           |
+| source_tables_prefix | String for source tables prefix or empty if not applicable     |
+| stage_tables_prefix  | String for stage tables prefix or empty if not applicable      |
+| tables_type          | String for tables type (incremental/ table / view)             |
+| staging_tables       | List for all objects                                           |
+
+another example to create data vault layer hub tables 
+```
+create_hubs_tables(
+  source_tables_prefix,
+  target_tables_prefix,
+  table_type,
+  schema_name,
+  hubs_tables
+)
+
+```
+
+| Argument              | Description                                                |
+|:----------------------|:-----------------------------------------------------------|
+| source_tables_prefix  | String for source tables prefix or empty if not applicable |
+| stage_tables_prefix   | String for stage tables prefix or empty if not applicable  |
+| tables_type           | String for tables type (incremental/ table / view)         |
+| schema_name           | String for hub tables dataset name                         |
+| hubs_tables           | List for all objects                                       |
+
+* create table by table using sqlx [staging tables](definitions/examples/sql/stg) , [staging tables](definitions/examples/sql/dvm), ...
+
+e.g. to create users stage table  
+```
+
+config {
+  type: "incremental",
+  schema: "citibike_stage_sql",
+  name: "stg_sql_users",
+  description: "Cleaned up data for users data source",
+  columns: models.users.columns_descriptions,
+  tags: ["stage-sql"],
+   bigquery: {
+    partitionBy: "DATE(load_time)",
+    clusterBy: ["load_id"]
+  }
+}
+
+
+
+${
+  dvform.get_stage_table(
+    dataform.projectConfig.vars.load_id,
+    ref("src_sql_users"), 
+    models.users.columns
+  )
+}
+```
+
+e.g. to create users hub table
+```
+config {
+  type: "incremental",
+  schema: "citibike_sql_dvm",
+  name: "hub_sql_users",
+  columns: models.users.columns_descriptions,
+  description: "hub users table",
+  uniqueKey: ["users_hash_id"],
+  tags: ["data-vault-sql"]
+}
+
+${
+    dvform.get_hub(
+      models.users.columns, 
+      ref("stg_sql_users"), 
+      "users_hash_id"
+    )
+}
+```
+## CI/CD for Dataform Pipelines
 
 ![alt ci-cd](resources/cicd.png)
 
@@ -161,7 +284,6 @@ Using `create_data_vault_from_model`
 * Deploy the dag to the cloud composer bucket.
 * Composer Dag task will run  and create the dataform code.
 * All tables will be created/updated in BigQuery.
-
 
 ## Scheduling
 
