@@ -1,0 +1,72 @@
+variables:
+  GITLAB_RUNNER_TAG: dataform
+  ENVIRONMENT: dev
+  DOCKER_ARTIFACTS_REGISTRY: us-east4-docker.pkg.dev/<PROJECT_ID>/<REPO_ID>
+  PROJECT_ID: <PROJECT_ID>
+  BQ_LOCATION: <BQ_LOCATION>
+  PIPELINE_NAME: <PIPELINE_NAME>
+  DAG_BUCKET: <DAG_BUCKET>
+
+before_script:
+  - echo "{\"projectId\":\"$PROJECT_ID\", \"location\": \"$BQ_LOCATION\"}" > .df-credentials.json
+
+stages:
+  - compile
+  - test
+  - dry_run
+  - build_and_push
+  - deploy_dag
+
+dataform_compile:
+  stage: compile
+  tags:
+    - $GITLAB_RUNNER_TAG
+  image:
+    name: dataformco/dataform:latest
+    entrypoint: [""]
+  script:
+    - dataform install
+    - dataform compile
+
+dataform_test:
+  stage: test
+  tags:
+    - $GITLAB_RUNNER_TAG
+  image:
+    name: dataformco/dataform:latest
+    entrypoint: [""]
+  script:
+    - dataform install
+    - dataform test
+
+dataform_dry_run:
+  stage: dry_run
+  tags:
+    - $GITLAB_RUNNER_TAG
+  image:
+    name: dataformco/dataform:latest
+    entrypoint: [""]
+  script:
+    - dataform install
+    - dataform run --dry-run
+
+build_and_push:
+  stage: build_and_push
+  tags:
+    - $GITLAB_RUNNER_TAG
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $DOCKER_ARTIFACTS_REGISTRY/$PIPELINE_NAME:$ENVIRONMENT --destination $DOCKER_ARTIFACTS_REGISTRY/$PIPELINE_NAME:$ENVIRONMENT-$CI_COMMIT_SHA%
+
+deploy_dag:
+  tags:
+    - $GITLAB_RUNNER_TAG
+  extends: .ci-tools-auth
+  needs: ["test"]
+  stage: deploy_dag
+  image: google/cloud-sdk:latest
+  script:
+    - base64 --decode token.txt > token2.txt
+    - gcloud alpha storage cp -R dags/* $DAG_BUCKET/dags --access-token-file=./token2.txt

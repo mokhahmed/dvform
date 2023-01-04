@@ -276,14 +276,16 @@ ${
 ```
 ## CI/CD for Dataform Pipelines
 
-![alt ci-cd](resources/cicd.png)
-
 * Push a new change to the dataform project git repository.
-* Cloud build/ triggered.
-* Create an image and push it into GCR.
+* CI pipeline triggered.
+* Create an [image](cicd/Dockerfile) and push it into Container Registry.
 * Deploy the dag to the cloud composer bucket.
-* Composer Dag task will run  and create the dataform code.
+* Composer [Dag](dag/citibike_data_vault_ingestion.py) task will run  and create the dataform code.
 * All tables will be created/updated in BigQuery.
+
+CI/CD Pipeline flow for dataform projects on GCP but could be extended on your ci/cd tool. check [gitlab-ci example](cicd/.gitlab-ci.yml)
+
+![alt ci-cd](resources/cicd.png)
 
 ## Scheduling
 
@@ -294,15 +296,17 @@ ${
 * Cloud Composer can manage the variables and environment variables which can also be further used by Dataform pipelines.
 
 ### Logging and monitoring
-We can see the dbt logs from Cloud Composer UI for each DAG run.
-As an example, this is the dbt run log that you can open from the Airflow UI:
+We can see the dataform logs from Cloud Composer UI for each DAG run.
+As an example, this is the dataform run log that you can open from the Airflow UI:
+![alt ci-cd](resources/dag-log-1.png)
+![alt ci-cd](resources/dag-log-2.png)
 
 ### Backfilling
 One of the best features in the Airflow is how it handles backfill. This Airflow feature can be implemented together with dataform.
 
 For example, this is an example of DAG that runs dataform:
-
-As a usual Airflow DAG, you can rerun any of the tasks or DAG run to backfill the data. Using the correct setup, the dbt will be able to handle the backfill mechanism from Airflow.
+![alt ci-cd](resources/backfill.png)
+As a usual Airflow DAG, you can rerun any of the tasks or DAG run to backfill the data. Using the correct setup, the dataform will be able to handle the backfill mechanism from Airflow.
 
 ## Data Quality
 
