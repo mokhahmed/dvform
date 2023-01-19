@@ -86,7 +86,7 @@ or you can download the index.js file and import it into `includes/index.js` the
 
 ### Usage
 
-#### 1. create citibike entities configuration `includes/models.js`  [citibike models example](includes/models.js) <br/>
+#### 1. create citibike entities configuration `includes/models.js`  [citibike models example](examples/includes/models.js) <br/>
 
   * **Define the entity configurations in the following structure <br/>**
 
@@ -117,7 +117,7 @@ or you can download the index.js file and import it into `includes/index.js` the
       | is_key             | "Y/N" yes or no flag represents if this column is a unique business key                      |
       | is_calculated      | "Y/N" yes or no flag if this column is calculated based on external logic                    |
       | calculated_by      | String for the sql logic to be applied for this column                                       |
-      | description        | String decription for the column that should appear at BigQuery Documentation                |
+      | description        | String description for the column that should appear at BigQuery Documentation                |
   
       **example** 
       ```
@@ -129,7 +129,7 @@ or you can download the index.js file and import it into `includes/index.js` the
             "is_key": "Y",
             "is_calculated": "N",
             "calculated_by": "",
-            "description": "col2 breif decription"
+            "description": "col2 breif description"
           }, ... ]
       ```
   * **Define the entity columns configurations in the following structure**
@@ -141,14 +141,14 @@ or you can download the index.js file and import it into `includes/index.js` the
     example 
     ```
       var entity_columns_descriptions_obj =  [{
-          "col2": "col2 breif decription",
+          "col2": "col2 breif description",
         }, ... ]
     ```
 
 
 ### you have 3 options to use DVForm based on the level of customization required
 
-* **Using `create_data_vault_from_model` api. e.g. [easy_setup example](definitions/easy_setup.js)**
+* **Using `create_data_vault_from_model` api. e.g. [easy_setup example](examples/definitions/easy_setup.js)**
  
 ```
 create_data_vault_from_model(
@@ -182,7 +182,7 @@ create_data_vault_from_model(
 | all_models               | List for all entities objects                                  |
 | links_tables             | List of link tables to be created                              |
 
-* create layer by layer [stage](definitions/examples/js/stg), [data-vault](definitions/examples/js/dvm), ... 
+* create layer by layer [stage](examples/definitions/examples/js/stg), [data-vault](examples/definitions/examples/js/dvm), ... 
 
 for example create the staging layer tables
 ```
@@ -225,7 +225,7 @@ create_hubs_tables(
 | schema_name           | String for hub tables dataset name                         |
 | hubs_tables           | List for all objects                                       |
 
-* create table by table using sqlx [staging tables](definitions/examples/sql/stg) , [staging tables](definitions/examples/sql/dvm), ...
+* create table by table using sqlx [staging tables](examples/definitions/examples/sql/stg) , [staging tables](examples/definitions/examples/sql/dvm), ...
 
 e.g. to create users stage table  
 ```
@@ -278,12 +278,12 @@ ${
 
 * Push a new change to the dataform project git repository.
 * CI pipeline triggered.
-* Create an [image](cicd/Dockerfile) and push it into Container Registry.
+* Create an [image](examples/cicd/Dockerfile) and push it into Container Registry.
 * Deploy the dag to the cloud composer bucket.
-* Composer [Dag](dag/citibike_data_vault_ingestion.py) task will run  and create the dataform code.
+* Composer [Dag](examples/dag/citibike_data_vault_ingestion.py) task will run  and create the dataform code.
 * All tables will be created/updated in BigQuery.
 
-CI/CD Pipeline flow for dataform projects on GCP but could be extended on your ci/cd tool. check [gitlab-ci example](cicd/.gitlab-ci.yml)
+CI/CD Pipeline flow for dataform projects on GCP but could be extended on your ci/cd tool. check [gitlab-ci example](examples/cicd/.gitlab-ci.yml)
 
 ![alt ci-cd](resources/cicd.png)
 
@@ -347,7 +347,7 @@ Unit tests give you confidence that your code produces the output data you expec
 
 A SQLX unit test passes fake input to a table or view query, checking that the output rows match some expected output data.
 
-By default, DVForm is not generating any unit-tests, but you can still write your test cases, add it your dataform code and run it as part of the [ci/cd pipeline](cicd/.gitlab-ci.yml)
+By default, DVForm is not generating any unit-tests, but you can still write your test cases, add it your dataform code and run it as part of the [ci/cd pipeline](examples/cicd/.gitlab-ci.yml)
 
 * Example
 

@@ -1,0 +1,7 @@
+{
+  "name": "city-bike-demo",
+  "dependencies": {
+    "@dataform/core": "2.0.1",
+    "dvform":"https://github.com/mokhahmed/dvform/archive/0.1.tar.gz"
+  }
+}
